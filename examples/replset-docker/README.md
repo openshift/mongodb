@@ -45,7 +45,7 @@ docker run -d --cidfile $CIDFILE_DIR/replset2 --name=replset-2 --hostname=replse
 docker exec replset-2 bash -c "while ! [ -f /tmp/initialized ]; do sleep 1; done"
 ```
 
-`run-mongod-replication` command have to be run in container (same script as for [OpenShift StatefulSet replication example](https://github.com/sclorg/mongodb-container/tree/master/examples/petset).
+`run-mongod-replication` command have to be run in container (same script as for [OpenShift StatefulSet replication example](https://github.com/sclorg/mongodb-container/tree/master/examples/statefulset).
 
 Parameters for `docker run` command:
 - `--name` and `--hostname` have to be set to the same value for each container to proper inter-container addressing

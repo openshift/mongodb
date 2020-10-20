@@ -1,7 +1,7 @@
 kind: Template
 apiVersion: v1
 metadata:
-  name: mongodb-petset-replication
+  name: mongodb-statefulset-replication
   annotations:
     description: "MongoDB Replication Example (based on StatefulSet). You must have persistent volumes available in your cluster to use this template."
     iconClass: "icon-mongodb"
@@ -90,8 +90,6 @@ objects:
     apiVersion: v1
     metadata:
       name: "${MONGODB_SERVICE_NAME}-internal"
-      annotations:
-        service.alpha.kubernetes.io/tolerate-unready-endpoints: "true"
     spec:
       clusterIP: None
       # the list of ports that are exposed by this service
@@ -101,16 +99,23 @@ objects:
       # will route traffic to pods having labels matching this selector
       selector:
         name: "${MONGODB_SERVICE_NAME}"
+      # Without this setting, you may find that the hostname of the secondaries will not resolve
+      # from within the pod of the mongodb primary. This will prevent the replicaset from 
+      # initializing correctly.
+      publishNotReadyAddresses: true
 
   - kind: StatefulSet
-    apiVersion: apps/v1beta1
+    apiVersion: apps/v1
     metadata:
       name: "${MONGODB_SERVICE_NAME}"
     spec:
-      # pets get DNS/hostnames that follow the pattern: ${metadata.name}-NUM.${spec.serviceName}.default.svc.cluster.local
+      # stateful sets get DNS/hostnames that follow the pattern: ${metadata.name}-NUM.${spec.serviceName}.default.svc.cluster.local
       serviceName: "${MONGODB_SERVICE_NAME}-internal"
       replicas: 3
       # describes the pod that will be created if insufficient replicas are detected
+      selector:
+        matchLabels:
+          name: "${MONGODB_SERVICE_NAME}"
       template:
         metadata:
           # this label will be used for count running pods
@@ -153,13 +158,12 @@ objects:
       volumeClaimTemplates:
         - metadata:
             name: mongo-data
-            annotations:
-              # Uncomment this if using dynamic volume provisioning.
-              # https://docs.okd.io/latest/install_config/persistent_storage/dynamically_provisioning_pvs.html
-              # volume.alpha.kubernetes.io/storage-class: anything
           spec:
             # the volume can be mounted as read-write by a single node
             accessModes: [ ReadWriteOnce ]
             resources:
               requests:
                 storage: "${VOLUME_CAPACITY}"
+            # The gp2 storage class is used by the AWS EBS dynamic storage provisioner
+            # See https://docs.okd.io/latest/install_config/persistent_storage/dynamically_provisioning_pvs.html for alternatives
+            storageClassName: gp2

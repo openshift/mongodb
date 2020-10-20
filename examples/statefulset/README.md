@@ -26,7 +26,7 @@ In the context of a project where you want to create a MongoDB cluster, run
 `oc new-app` passing the template file as an argument:
 
 ```bash
-oc new-app https://raw.githubusercontent.com/sclorg/mongodb-container/master/examples/petset/mongodb-petset-persistent.yaml
+oc new-app https://raw.githubusercontent.com/sclorg/mongodb-container/master/examples/statefulset/mongodb-statefulset-persistent.yaml
 ```
 
 The command above will create a MongoDB cluster with 3 replica set members.
@@ -121,7 +121,7 @@ sufficient available persistent volumes, or a dynamic storage provisioner is
 present, scaling up is done with the `oc scale` command:
 
 ```bash
-oc scale --replicas=5 petset/mongodb
+oc scale --replicas=5 statefulset.app/mongodb
 ```
 
 New pods (containers) are created and they connect to the replica set, updating
@@ -149,7 +149,7 @@ preconditions are met (storage availability, size of existing database and
 To scaling down, start with setting the new number of replicas, e.g.:
 
 ```bash
-oc scale --replicas=3 petset/mongodb
+oc scale --replicas=3 statefulset.app/mongodb
 ```
 
 Note that if the new number of replicas still constitutes a majority of the
@@ -161,7 +161,7 @@ On the other hand, scaling down to a lower number will temporarily render the
 replica set to have only SECONDARY members and be in read-only mode. That would
 be the case when scaling from 5 down to 1 member.
 
-The next step is to update the replica set configuration to
+The next step is to update the mongodb replica set configuration to
 [remove members](https://docs.mongodb.com/manual/tutorial/remove-replica-set-member/)
 that no longer exist. This may be improved in the future, a possible
 implementation being setting a PreStop pod hook that inspects the number of

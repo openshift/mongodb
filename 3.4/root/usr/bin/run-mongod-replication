@@ -1,7 +1,7 @@
 #!/bin/bash
 #
 # Run mongod in a StatefulSet-based replica set. See
-# https://github.com/sclorg/mongodb-container/blob/master/examples/petset/README.md
+# https://github.com/sclorg/mongodb-container/blob/master/examples/statefulset/README.md
 # for a description of how this is intended to work.
 #
 # Note:
