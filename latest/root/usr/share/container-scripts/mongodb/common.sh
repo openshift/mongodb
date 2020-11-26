@@ -67,6 +67,11 @@ function endpoints() {
   dig ${service_name} A +search +short 2>/dev/null
 }
 
+function count_endpoints() {
+  service_name=${MONGODB_SERVICE_NAME:-mongodb}
+  dig ${service_name} A +search +short 2>/dev/null | wc -w
+}
+
 # replset_addr return the address of the current replSet
 function replset_addr() {
   local current_endpoints db

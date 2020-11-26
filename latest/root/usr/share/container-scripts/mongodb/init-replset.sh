@@ -10,6 +10,21 @@ source "${CONTAINER_SCRIPTS_PATH}/common.sh"
 # (for example, "replica-2.mongodb.myproject.svc.cluster.local")
 readonly MEMBER_HOST="$(hostname -f)"
 
+# Start the replica set configuration.
+function start_replicaset()
+{
+  if [ $(count_endpoints) -gt 1 ]; then
+    info "Found more than one endpoint. add node to existing replica set"
+    add_member "${MEMBER_HOST}"
+  else
+    # Initialize only if Memberid=0
+    if [ "${MEMBER_ID}" = '0' ]; then
+        info "Replica set not existing. initiate replica set"
+        initiate "${MEMBER_HOST}"
+    fi
+  fi
+}
+
 # Initializes the replica set configuration.
 #
 # Arguments:
@@ -65,10 +80,4 @@ if [[ $(mongo_cmd --host localhost --quiet <<<'db.isMaster().setName') == "${MON
   exit 0
 fi
 
-# Initialize replica set only if we're the first member
-if [ "${MEMBER_ID}" = '0' ]; then
-  initiate "${MEMBER_HOST}"
-else
-  add_member "${MEMBER_HOST}"
-fi
-
+start_replicaset
